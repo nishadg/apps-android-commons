@@ -116,7 +116,7 @@ public class ContributionsContentProvider extends ContentProvider{
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
-        Log.d("Commons", "Hello, bulk insert! (ContributionsContentProvider)");
+        Log.d("Commons", "Hello, bulk insert!");
         int uriType = uriMatcher.match(uri);
         SQLiteDatabase sqlDB = dbOpenHelper.getWritableDatabase();
         sqlDB.beginTransaction();
