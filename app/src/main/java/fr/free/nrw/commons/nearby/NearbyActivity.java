@@ -1,25 +1,29 @@
 package fr.free.nrw.commons.nearby;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import fr.free.nrw.commons.R;
 
-public class NearbyActivity extends AppCompatActivity {
+public class NearbyActivity extends AppCompatActivity implements LocationService.Callbacks{
 
     private MyLocationListener myLocationListener;
     private LocationManager locationManager;
     private String provider;
     private Criteria criteria;
     private LatLng mLatestLocation;
+    private LocationService myService;
 
     private double currentLatitude, currentLongitude;
     //private String gpsCoords;
@@ -40,6 +44,13 @@ public class NearbyActivity extends AppCompatActivity {
         NearbyListFragment fragment = new NearbyListFragment();
         ft.add(R.id.container, fragment);
         ft.commit();
+
+        Intent intent = new Intent();
+        intent.setAction("fr.free.nrw.commons.LOC");
+        intent.setPackage(getPackageName());
+        Log.d("PackageName",getPackageName());
+        startService(intent);
+        bindService(intent,mConnection,BIND_AUTO_CREATE);
     }
 
     @Override
@@ -82,6 +93,12 @@ public class NearbyActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void updateClient(double latitude, double longitude) {
+        currentLatitude = latitude;
+        currentLongitude = longitude;
+    }
+
     /**
      * Listen for user's location when it changes
      */
@@ -118,4 +135,21 @@ public class NearbyActivity extends AppCompatActivity {
 
         unregisterLocationManager();
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+
+            // We've binded to LocalService, cast the IBinder and get LocalService instance
+            LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
+            myService = binder.getServiceInstance(); //Get instance of your service!
+            myService.registerClient(NearbyActivity.this); //Activity register in the service as client for callabcks!
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+        }
+    };
 }
