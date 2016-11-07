@@ -13,10 +13,11 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import fr.free.nrw.commons.R;
 
-public class NearbyActivity extends AppCompatActivity implements LocationService.Callbacks{
+public class NearbyActivity extends AppCompatActivity implements LocationService.Callbacks {
 
     private MyLocationListener myLocationListener;
     private LocationManager locationManager;
@@ -27,6 +28,7 @@ public class NearbyActivity extends AppCompatActivity implements LocationService
 
     private double currentLatitude, currentLongitude;
     //private String gpsCoords;
+    boolean init;
 
     private static final String TAG = NearbyActivity.class.getName();
 
@@ -37,30 +39,26 @@ public class NearbyActivity extends AppCompatActivity implements LocationService
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        registerLocationManager();
-
-        // Begin the transaction
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        NearbyListFragment fragment = new NearbyListFragment();
-        ft.add(R.id.container, fragment);
-        ft.commit();
+//        registerLocationManager();
 
         Intent intent = new Intent();
         intent.setAction("fr.free.nrw.commons.LOC");
         intent.setPackage(getPackageName());
-        Log.d("PackageName",getPackageName());
+        Log.d("PackageName", getPackageName());
         startService(intent);
-        bindService(intent,mConnection,BIND_AUTO_CREATE);
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
+
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
     }
 
     protected LatLng getmLatestLocation() {
         return mLatestLocation;
     }
+
     /**
      * Registers a LocationManager to listen for current location
      */
@@ -97,6 +95,16 @@ public class NearbyActivity extends AppCompatActivity implements LocationService
     public void updateClient(double latitude, double longitude) {
         currentLatitude = latitude;
         currentLongitude = longitude;
+        mLatestLocation = new LatLng(currentLatitude, currentLongitude);
+        Log.d("Location", "Latitude: " + String.valueOf(currentLatitude) + " Longitude: " + String.valueOf(currentLongitude));
+        if(!init){
+            init = true;
+            // Begin the transaction
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            NearbyListFragment fragment = new NearbyListFragment();
+            ft.add(R.id.container, fragment);
+            ft.commit();
+        }
     }
 
     /**
@@ -130,10 +138,10 @@ public class NearbyActivity extends AppCompatActivity implements LocationService
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
-
-        unregisterLocationManager();
+        unbindService(mConnection);
+//        unregisterLocationManager();
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -145,7 +153,8 @@ public class NearbyActivity extends AppCompatActivity implements LocationService
             // We've binded to LocalService, cast the IBinder and get LocalService instance
             LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
             myService = binder.getServiceInstance(); //Get instance of your service!
-            myService.registerClient(NearbyActivity.this); //Activity register in the service as client for callabcks!
+            myService.registerClient(NearbyActivity.this); //Activity register in the service as client for callbacks!
+            Toast.makeText(myService, "Fetching Location. Please wait.", Toast.LENGTH_SHORT).show();
         }
 
         @Override

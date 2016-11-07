@@ -61,7 +61,7 @@ public class NearbyListFragment extends ListFragment implements TaskListener {
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
         //Check that this is the first time view is created, to avoid double list when screen orientation changed
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             mLatestLocation = ((NearbyActivity) getActivity()).getmLatestLocation();
             listview = (ListView) getView().findViewById(R.id.listview);
             nearbyAsyncTask = new NearbyAsyncTask(this);
@@ -114,7 +114,7 @@ public class NearbyListFragment extends ListFragment implements TaskListener {
         super.onDestroy();
 
         // See http://stackoverflow.com/questions/18264408/incomplete-asynctask-crashes-my-app
-        if(nearbyAsyncTask != null && nearbyAsyncTask.getStatus() != AsyncTask.Status.FINISHED) {
+        if (nearbyAsyncTask != null && nearbyAsyncTask.getStatus() != AsyncTask.Status.FINISHED) {
             nearbyAsyncTask.cancel(true);
         }
     }
@@ -123,7 +123,7 @@ public class NearbyListFragment extends ListFragment implements TaskListener {
 
         private final TaskListener listener;
 
-        public NearbyAsyncTask (TaskListener listener) {
+        public NearbyAsyncTask(TaskListener listener) {
             this.listener = listener;
         }
 
@@ -149,7 +149,7 @@ public class NearbyListFragment extends ListFragment implements TaskListener {
         protected void onPostExecute(List<Place> result) {
             super.onPostExecute(result);
 
-            if(isCancelled()) {
+            if (isCancelled()) {
                 return;
             }
 
@@ -199,7 +199,7 @@ public class NearbyListFragment extends ListFragment implements TaskListener {
         public View getView(int position, View convertView, ViewGroup parent) {
             // Get the data item for this position
             Place place = (Place) getItem(position);
-            Log.d(TAG, "Place " + place.name);
+            Log.d(TAG, "Place " + place.name + " " + mLatestLocation.latitude + ", " + mLatestLocation.longitude);
 
             // Check if an existing view is being reused, otherwise inflate the view
             if (convertView == null) {
@@ -222,7 +222,7 @@ public class NearbyListFragment extends ListFragment implements TaskListener {
             // See https://github.com/commons-app/apps-android-commons/issues/250
             // Most common types of desc: building, house, cottage, farmhouse, village, civil parish, church, railway station,
             // gatehouse, milestone, inn, secondary school, hotel
-            switch(place.description) {
+            switch (place.description) {
                 case "building":
                     icon.setImageResource(R.drawable.round_icon_generic_building);
                     break;

@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 public class LocationService extends Service implements LocationListener {
     //**************************Code for accessing location**************************************//
@@ -37,12 +38,17 @@ public class LocationService extends Service implements LocationListener {
     // Declaring a Location Manager
     protected LocationManager locationManager;
     public LocationService() {
+
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         mContext = this;
         getLocation();
+        return super.onStartCommand(intent, flags, startId);
     }
 
     public Location getLocation() {
-        try {
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
 
@@ -92,15 +98,12 @@ public class LocationService extends Service implements LocationListener {
                         }
                     }
                 }
-
                 }catch (SecurityException se){
                     se.printStackTrace();
                 }
+
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         return location;
     }
@@ -114,7 +117,8 @@ public class LocationService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         this.location = location;
-//        activity.updateClient(location.getLatitude(),location.getLongitude());
+        Log.d("Harambe","All Hail Harambe!");
+        activity.updateClient(location.getLatitude(),location.getLongitude());
     }
 
     @Override
@@ -161,6 +165,7 @@ public class LocationService extends Service implements LocationListener {
     //Here Activity register to the service as Callbacks client
     public void registerClient(Activity activity){
         this.activity = (Callbacks)activity;
+        this.activity.updateClient(location.getLatitude(),location.getLongitude());
     }
 
     //returns the instance of the service
